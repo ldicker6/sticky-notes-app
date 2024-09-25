@@ -6,7 +6,8 @@ const notes = [
   //  { id: 2, text: "Buy bread"},
 ];
 
-    let nextNoteId = 3;
+    let nextNoteId = 0;
+    let active_note = null;
 
  // let nextTodoId = 4;
   //let filter = "all"; // can be 'all', 'active', or 'completed'
@@ -54,20 +55,63 @@ function createStickyNote(noteText, noteId) {
 
     //now create the text for the sticky note
     const noteTextDiv = document.createElement("div");
-    noteTextDiv.classList.add("p-4");
-    //make sure new lines are shown as new lines
-    const formattedString = noteText.replace(/\n/g, '\n<br>');
-    noteTextDiv.innerHTML = formattedString;
+    noteTextDiv.classList.add("p-4","note-text");
 
-   noteTextDiv.addEventListener('dblclick', handleEditNote);
+    //const formattedString = noteText.replace(/\n/g, '\n<br>');
+    noteTextDiv.textContent = noteText;
+    // <div class="p-4 note-text">Buy milk</div>
+    /*
+     // Create the div to display the note text (non-editable by default)
+    const noteTextDiv = document.createElement("div");
+    noteTextDiv.classList.add("p-4", "note-text");
+    
+    
+    // Create the hidden textarea for editing
+    const noteTextArea = document.createElement("textarea");
+    noteTextArea.classList.add("absolute", "top-0", "left-0", "hidden", "w-full", "h-full", "p-4", "transition-transform", "transform", "bg-yellow-300", "shadow-xl", "resize-none", "outline-rose-700", "outline-offset-0", "note-edit", "note", "hover:scale-105");
+    noteTextArea.value = noteText; // Initialize with the note's text
+
+    // Append the div and textarea to the sticky note
+    noteItem.appendChild(noteTextDiv);
+    noteItem.appendChild(noteTextArea);
+
+    */
+    //make sure new lines are shown as new lines
+    /*
+    const noteTextArea = document.createElement("textarea");
+    noteTextArea.classList.add("absolute" ,"top-0", "left-0", "hidden", "w-full", "h-full" ,"p-4", "transition-transform", "transform", "bg-yellow-300", "shadow-xl", "resize-none", "outline-rose-700", "outline-offset-0" ,"note-edit", "note", "hover:scale-105");
+    const formattedString = noteText.replace(/\n/g, '\n<br>');
+    noteTextArea.value = formattedString;
+    console.log(noteText);
+    noteTextDiv.innerHTML = noteTextArea.value;
+    */
+    const noteTextArea = document.createElement("textarea");
+    noteTextArea.classList.add("absolute", "top-0", "left-0", "hidden", "w-full", "h-full", "p-4", "transition-transform", "transform", "bg-yellow-300", "shadow-xl", "resize-none", "outline-rose-700", "outline-offset-0", "note-edit", "note", "hover:scale-105");
+    noteTextArea.value = noteText; // Initialize with the note's text
+    
+    // Save the updated text from the textarea to the div
+     noteTextDiv.innerHTML = noteTextArea.value.replace(/\n/g, "<br>");
+
+     // Update the notes array (assuming you have a global notes array)
+     // Switch back to non-edit mode
+     noteTextArea.classList.add("hidden");
+     noteTextDiv.style.display = "block";
+    //noteTextDiv.addEventListener('dblclick', handleEditNote);
 
     // Append the note text to the note container
     noteItem.appendChild(noteTextDiv);
+    noteItem.appendChild(noteTextArea);
 
     // Append the sticky note to the notes wall
     const notesWall = document.getElementById("notes-wall");
     notesWall.appendChild(noteItem);
-
+    notesWall.addEventListener("dblclick", function (event) {
+        if (notes.length > event.target.id) {
+            handleEditNoteMode(event.target);
+            
+        }
+    });
+    addSaveListenerToTextArea(noteItem);
 
 
     // Add an event listener to the delete button to handle note deletion
@@ -92,7 +136,6 @@ function handleDeleteNote(event) {
 
 
 
-
 function render_notes(){
     const noteListElement = document.getElementById("notes-wall");
     noteListElement.innerHTML = ""; // clear the current list
@@ -107,6 +150,7 @@ function render_notes(){
 }
 
 function handleNewNoteCreation(event) {
+    console.log("here");
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault(); // Prevent creating new lines in the textarea
         
@@ -128,9 +172,108 @@ function handleNewNoteCreation(event) {
         }, 0);
     }
 }
+/*
+
+// Function to toggle the completed status of a todo
+function handleEditNote(event) {
+    let note = null;
+    
+    if (event.target.id !== null){//&& event.target.id.includes("todo-text")) {
+      //todo = event.target;
+      //console.log(event.target.parentNode.id);
+      note = event.target;
+    }
+  
+    let noteIdNumber = -1;
+    if (note) {
+      const noteId = event.target.id;
+      todoIdNumber = Number(todoId);
+    }
+  
+    render_notes();
+  }
+  */
+ 
+
+
+function handleEditNoteMode(noteElement) {
+    //first we need to check if we clicked on the text area or the div at the top:
+    const hasId = noteElement.id ? true : false; 
+        //this means we are in the div below the text. 
+    if(hasId === true){
+        active_note= noteElement;
+
+    } else {
+        active_note = noteElement.parentNode;
+    }
+
+    
+   
+    const noteTextDiv = active_note.querySelector('div');
+    const noteTextArea = active_note.querySelector('textarea');
+    // Hide the div that shows the text and display the textarea
+    noteTextDiv.style.display = "none";
+    noteTextArea.classList.remove("hidden");
+    noteTextArea.focus();  // Focus on the textarea for immediate editing
+
+    
+    
+   // console.log(noteElement.querySelector('div'));
+
+    document.addEventListener("click", handleClickOutside);
+}
+
+function handleClickOutside(event){
+    console.log(event.target);
+    console.log(active_note)
+    if (event.target !== active_note && !active_note.contains(event.target)) {
+        saveNoteEdits();
+    }
+}
+
+function handleSaveNote(event) {
+    if ((event.key === "Enter" && !event.shiftKey) || event.key === "Escape") {
+        event.preventDefault(); // Prevent any default actions like adding new lines
+        saveNoteEdits(); // Call to save edits when Enter or Escape is pressed
+    }
+}
+
+function saveNoteEdits() {
+        
+        
+        const noteTextArea = active_note.querySelector(".note-edit");
+        const noteElement = noteTextArea.parentElement;
+        const noteTextDiv = active_note.querySelector(".note-text");
+
+        // Save the updated text from the textarea to the div
+        noteTextDiv.innerHTML = noteTextArea.value.replace(/\n/g, "<br>");
+
+        // Update the notes array (assuming you have a global notes array)
+        const noteId = Number(noteElement.id);
+        const noteIndex = notes.findIndex(note => note.id === noteId);
+        if (noteIndex !== -1) {
+            notes[noteIndex].text = noteTextArea.value;
+        }
+
+        // Switch back to non-edit mode
+        noteTextArea.classList.add("hidden");
+        noteTextDiv.style.display = "block";
+        document.removeEventListener("click", handleClickOutside);
+   
+        active_note=null;
+
+}
+
+function addSaveListenerToTextArea(noteElement) {
+    const noteTextArea = noteElement.querySelector(".note-edit");
+    noteTextArea.addEventListener("keydown", handleSaveNote);
+    
+}
 
 
 
+
+/*
 // Function to handle the editing of a note
 function handleEditNote(event) {
     const noteDiv = event.target; // The note that was clicked
@@ -223,12 +366,17 @@ function handleEditNote(event) {
     });
 }
 
+*/
+
 
     
 
 
 // Event listener to initialize the app after the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', render_notes);
+
+const note_element = document.getElementById('notes-wall');
+//note_element.addEventListener('dblclick', handleEditNote);
 
 //const existingNoteInput = document.getElementById()
 const newNoteInput = document.getElementById('new-note');
