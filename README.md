@@ -54,7 +54,7 @@ pnpm dev
 pnpm preview
 ```
 ---
-##Future Improvements
+## Future Improvements
 
 - Customizable note colors & sizes
 - Pin important notes to the top
