@@ -2,7 +2,7 @@
 
 A simple, interactive sticky notes board built with Vite, JavaScript, and Tailwind CSS. Users can create, edit, and delete sticky notes in a clean, responsive interface.
 
-## Live Demo: Sticky Notes App
+## Live Demo: [Sticky Notes App](https://ldicker6.github.io/sticky-notes-app/)
 ---
 ## Features
 
@@ -26,9 +26,19 @@ A simple, interactive sticky notes board built with Vite, JavaScript, and Tailwi
 
 ---
 
-## Screenshots
+## 📸 Screenshots
 
-(Add your own screenshots here — e.g., one showing multiple notes on the wall, another showing edit mode.)
+**Home / Add Notes**  
+![Home Page](./landing_page.png)
+
+**Editing a Note**  
+![Editing a Note](./edit_sticky.png)
+
+**Deleting a Note**  
+![Deleting a Note](./mouse_hover_delete.png)
+
+**Long Notes**  
+![Deleting a Note](./scrollable_sticky.png)
 
 ---
 
